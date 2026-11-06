@@ -1,0 +1,255 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:Playfair;src:url(fonts/playfair-display-latin-500-normal.woff2);font-weight:500}
+@font-face{font-family:Playfair;src:url(fonts/playfair-display-latin-600-normal.woff2);font-weight:600}
+@font-face{font-family:Playfair;src:url(fonts/playfair-display-latin-500-italic.woff2);font-weight:500;font-style:italic}
+@font-face{font-family:Afacad;src:url(fonts/afacad-latin-400-normal.woff2);font-weight:400}
+@font-face{font-family:Afacad;src:url(fonts/afacad-latin-500-normal.woff2);font-weight:500}
+@font-face{font-family:Afacad;src:url(fonts/afacad-latin-600-normal.woff2);font-weight:600}
+:root{--brown:#5F3916;--copper:#B5652A;--ivory:#F7F1E8;--peach:#F1A56C}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#000}
+#c{position:relative;overflow:hidden}
+#c svg.art{position:absolute;inset:0}
+.txt{position:absolute;font-family:Afacad,sans-serif}
+.eyebrow{font-weight:600;letter-spacing:.34em;text-transform:uppercase}
+.h{font-family:Playfair,serif;font-weight:500;line-height:1.08;letter-spacing:-.005em}
+.h em{font-style:italic}
+.orn{display:flex;align-items:center;gap:12px}
+.orn i{display:block;height:1px;width:56px}
+.orn b{display:block;width:7px;height:7px;transform:rotate(45deg)}
+.sub{font-weight:400;line-height:1.45}
+.cta{display:inline-block;font-weight:600;letter-spacing:.22em;text-transform:uppercase;border-radius:2px}
+.cta span{display:inline-block;margin-left:14px}
+</style></head>
+<body><div id="c"></div>
+<script>
+const P=new URLSearchParams(location.search);
+const V=P.get('v')||'dhanteras', L=P.get('l')||'desktop', T=P.get('t')!=='0';
+const W=L==='desktop'?1440:540, H=L==='desktop'?600:675;
+const C={brown:'#5F3916',copper:'#B5652A',ivory:'#F7F1E8',peach:'#F1A56C'};
+let uid=0;
+
+// ---------- metal gradients ----------
+const METALS={
+ copper:['#3a1606','#6e2f10','#b5652a','#f3b282','#ffd9b8','#d4864a','#9a4b1c','#5e2a0c','#2e1204'],
+ brass:['#3a2806','#7a5b17','#c79e45','#f4dc93','#fff3cf','#d9b45a','#93702a','#5a410f','#2a1c04'],
+ bronze:['#2a1708','#5c3a17','#9b6a35','#d7aa72','#f2d5ab','#b5834c','#7c5328','#4b2f12','#22130a'],
+};
+function defs(){
+  let s='';
+  for(const [k,st] of Object.entries(METALS)){
+    const n=st.length;
+    s+=`<linearGradient id="m-${k}" x1="0" x2="1" y1="0" y2="0">${st.map((c,i)=>`<stop offset="${[0,.1,.26,.38,.44,.52,.7,.86,1][i]}" stop-color="${c}"/>`).join('')}</linearGradient>`;
+  }
+  s+=`<linearGradient id="shadeV" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".45" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></linearGradient>
+  <radialGradient id="flame" cx=".5" cy=".72" r=".6"><stop offset="0" stop-color="#fffdf2"/><stop offset=".35" stop-color="#ffe7a6"/><stop offset=".7" stop-color="#F1A56C"/><stop offset="1" stop-color="#d9622a" stop-opacity=".6"/></radialGradient>
+  <radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffcf8f" stop-opacity=".55"/><stop offset=".4" stop-color="#F1A56C" stop-opacity=".18"/><stop offset="1" stop-color="#F1A56C" stop-opacity="0"/></radialGradient>
+  <radialGradient id="glowSoft" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#F1A56C" stop-opacity=".45"/><stop offset=".55" stop-color="#B5652A" stop-opacity=".12"/><stop offset="1" stop-color="#B5652A" stop-opacity="0"/></radialGradient>
+  <radialGradient id="coconut" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#a7743f"/><stop offset=".55" stop-color="#6b4220"/><stop offset="1" stop-color="#2e1a09"/></radialGradient>
+  <linearGradient id="leaf" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#6f7a3a"/><stop offset=".6" stop-color="#4a5524"/><stop offset="1" stop-color="#2f3714"/></linearGradient>
+  <filter id="b2" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2"/></filter>
+  <filter id="b4" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4"/></filter>
+  <filter id="b8" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="8"/></filter>
+  <filter id="b20" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="20"/></filter>
+  <pattern id="hammer" width="14" height="12" patternUnits="userSpaceOnUse">
+   <ellipse cx="4" cy="3" rx="3.2" ry="2.4" fill="#fff" opacity=".06"/><ellipse cx="4.6" cy="3.8" rx="3" ry="2" fill="#000" opacity=".06"/>
+   <ellipse cx="11" cy="9" rx="3.2" ry="2.4" fill="#fff" opacity=".055"/><ellipse cx="11.6" cy="9.8" rx="3" ry="2" fill="#000" opacity=".065"/>
+  </pattern>
+  <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .37  0 0 0 0 .22  0 0 0 0 .09  0 0 0 .07 0"/></filter>`;
+  return s;
+}
+// metallic shape: base fill + vertical shading + optional hammer + streak highlight
+function metal(d,m,{hammer=false,streak=null}={}){
+  const id='cl'+(uid++);
+  let s=`<clipPath id="${id}"><path d="${d}"/></clipPath><path d="${d}" fill="url(#m-${m})"/><path d="${d}" fill="url(#shadeV)"/>`;
+  if(hammer) s+=`<path d="${d}" fill="url(#hammer)"/>`;
+  if(streak) s+=`<g clip-path="url(#${id})"><ellipse cx="${streak[0]}" cy="${streak[1]}" rx="${streak[2]}" ry="${streak[3]}" fill="#fff" opacity=".42" filter="url(#b4)"/></g>`;
+  s+=`<path d="${d}" fill="none" stroke="#1e0c03" stroke-opacity=".35" stroke-width=".8"/>`;
+  return s;
+}
+const E=(cx,cy,rx,ry)=>`M${cx-rx},${cy} a${rx},${ry} 0 1,0 ${2*rx},0 a${rx},${ry} 0 1,0 ${-2*rx},0Z`;
+const ground=(rx,op=.38)=>`<ellipse cx="0" cy="2" rx="${rx}" ry="${rx*.13}" fill="#1a0a02" opacity="${op}" filter="url(#b8)"/>`;
+const at=(x,y,s,inner)=>`<g transform="translate(${x},${y}) scale(${s})">${inner}</g>`;
+
+function kalash(m='copper',withLeaves=true){
+  let s=ground(100);
+  s+=metal(E(0,-2,44,9),m);
+  const body='M-30,-170 C-95,-158 -108,-92 -92,-50 C-79,-17 -45,-2 0,0 C45,-2 79,-17 92,-50 C108,-92 95,-158 30,-170Z';
+  s+=metal(body,m,{hammer:true,streak:[-48,-95,9,52]});
+  s+=`<path d="M-99,-112 Q0,-92 99,-112" fill="none" stroke="#2a1003" stroke-opacity=".45" stroke-width="1.6"/><path d="M-99,-109 Q0,-89 99,-109" fill="none" stroke="#ffe0c2" stroke-opacity=".35" stroke-width="1"/>`;
+  s+=`<path d="M-96,-100 Q0,-80 96,-100" fill="none" stroke="#2a1003" stroke-opacity=".35" stroke-width="1"/>`;
+  s+=metal('M-27,-200 L27,-200 L31,-170 L-31,-170Z',m,{streak:[-12,-185,4,14]});
+  if(withLeaves){
+    const leaf='M0,0 C18,-13 62,-16 92,0 C62,12 18,11 0,0Z';
+    for(const a of [-172,-150,-128,-52,-30,-8]) s+=`<g transform="translate(0,-208) rotate(${a})"><path d="${leaf}" fill="url(#leaf)"/><path d="M4,0 L86,0" stroke="#c9cf8f" stroke-opacity=".35" stroke-width="1"/></g>`;
+  }
+  s+=metal('M-52,-202 C-40,-215 40,-215 52,-202 C40,-190 -40,-190 -52,-202Z',m);
+  s+=`<ellipse cx="0" cy="-204" rx="40" ry="5.5" fill="#2a1003" opacity=".7"/>`;
+  if(withLeaves){
+    s+=`<ellipse cx="0" cy="-242" rx="33" ry="40" fill="url(#coconut)"/>`;
+    for(let i=0;i<14;i++){const x=-26+i*4;s+=`<path d="M${x},-270 Q${x+2},-245 ${x-1},-208" stroke="#2a1606" stroke-opacity=".35" fill="none"/>`}
+    s+=`<path d="M-6,-280 Q0,-300 10,-296 Q2,-290 4,-280Z" fill="#4a2b10"/>`;
+    // sacred thread
+    s+=`<path d="M-30,-176 Q0,-166 30,-176" stroke="#c0392b" stroke-opacity=".0" fill="none"/>`;
+  }
+  return s;
+}
+function lota(m='copper'){
+  let s=ground(74);
+  s+=metal(E(0,-2,34,7),m);
+  s+=metal('M-22,-122 C-78,-112 -80,-32 -56,-13 C-40,-1 40,-1 56,-13 C80,-32 78,-112 22,-122Z',m,{hammer:true,streak:[-34,-70,7,34]});
+  s+=`<path d="M-77,-72 Q0,-56 77,-72" fill="none" stroke="#2a1003" stroke-opacity=".4" stroke-width="1.3"/>`;
+  s+=metal('M-22,-122 L22,-122 L36,-144 L-36,-144Z',m,{streak:[-14,-132,4,10]});
+  s+=metal(E(0,-145,38,6.5),m);
+  s+=`<ellipse cx="0" cy="-145.5" rx="30" ry="4" fill="#2a1003" opacity=".75"/>`;
+  return s;
+}
+function tumbler(m='copper'){
+  let s=ground(46);
+  s+=metal('M-34,-140 L34,-140 L27,0 L-27,0Z',m,{hammer:true,streak:[-16,-70,5,60]});
+  s+=`<path d="M-33,-118 L33,-118" stroke="#2a1003" stroke-opacity=".35"/><path d="M-29,-30 L29,-30" stroke="#2a1003" stroke-opacity=".35"/>`;
+  s+=metal(E(0,-140,34,6),m);
+  s+=`<ellipse cx="0" cy="-140" rx="30" ry="4.4" fill="#2a1003" opacity=".8"/>`;
+  return s;
+}
+function coin(x,y,m='brass',r=24){
+  return `<g transform="translate(${x},${y})">${metal(E(0,4,r,r*.34),m)}<path d="${E(0,4,r,r*.34)}" fill="#000" opacity=".35"/>${metal(E(0,0,r,r*.34),m)}<ellipse cx="0" cy="0" rx="${r*.72}" ry="${r*.24}" fill="none" stroke="#5a3d0a" stroke-opacity=".55" stroke-width="1"/></g>`;
+}
+function flame(x,y,s=1){
+  return `<g transform="translate(${x},${y}) scale(${s})"><circle cx="0" cy="-22" r="70" fill="url(#glow)"/><path d="M0,0 C-11,-7 -12,-26 0,-50 C12,-26 11,-7 0,0Z" fill="url(#flame)" filter="url(#b2)"/><path d="M0,-2 C-5,-6 -5,-16 0,-28 C5,-16 5,-6 0,-2Z" fill="#fffef6" opacity=".9"/></g>`;
+}
+function diya(m='brass',lit=true){
+  let s=ground(58,.45);
+  s+=metal('M-50,-16 C-46,6 -14,10 6,10 C30,10 44,0 50,-10 L70,-22 C58,-24 48,-20 44,-16Z',m,{streak:[-20,-6,16,4]});
+  s+=`<path d="M-50,-16 C-30,-24 30,-24 46,-16 C30,-9 -30,-9 -50,-16Z" fill="#2a1505"/>`;
+  s+=`<path d="M-44,-16 C-28,-21 26,-21 42,-16 C26,-12 -28,-12 -44,-16Z" fill="#7a4a12" opacity=".6"/>`;
+  s+=metal(E(0,8,20,4),m);
+  if(lit) s+=flame(64,-22,.8);
+  return s;
+}
+function thali(m='brass'){
+  let s=ground(200,.5);
+  s+=metal(E(0,0,200,36),m);
+  s+=`<ellipse cx="0" cy="-4" rx="168" ry="27" fill="#3d2a07" opacity=".35"/>`;
+  s+=`<ellipse cx="0" cy="-4" rx="168" ry="27" fill="none" stroke="#fff3cf" stroke-opacity=".35"/>`;
+  s+=`<ellipse cx="0" cy="-4" rx="120" ry="19" fill="none" stroke="#5a3d0a" stroke-opacity=".5" stroke-dasharray="2 5"/>`;
+  return s;
+}
+function hangLamp(x,len,s=1,m='brass'){
+  return `<line x1="${x}" y1="0" x2="${x}" y2="${len}" stroke="#d9b45a" stroke-opacity=".7" stroke-width="1"/>
+  <g transform="translate(${x},${len}) scale(${s})">
+   ${metal('M-22,0 C-22,-26 22,-26 22,0Z',m,{streak:[-9,-10,4,8]})}
+   ${metal(E(0,0,26,5),m)}
+   ${metal('M-6,-22 L6,-22 L3,-30 L-3,-30Z',m)}
+   <g transform="translate(0,22)">${metal('M-26,-2 C-22,14 22,14 26,-2 C14,4 -14,4 -26,-2Z',m)}</g>
+   ${flame(0,16,.55)}
+   ${metal('M-4,26 C-4,40 4,40 4,26Z',m)}
+  </g>`;
+}
+function mandala(cx,cy,r,col,op){
+  let s=`<g transform="translate(${cx},${cy})" fill="none" stroke="${col}" stroke-opacity="${op}" stroke-width="1">`;
+  s+=`<circle r="${r}"/><circle r="${r*.94}"/><circle r="${r*.62}"/><circle r="${r*.3}"/>`;
+  const n=24;
+  for(let i=0;i<n;i++){const a=i*360/n;s+=`<g transform="rotate(${a})"><path d="M0,${-r*.62} C${r*.09},${-r*.74} ${r*.06},${-r*.88} 0,${-r*.94} C${-r*.06},${-r*.88} ${-r*.09},${-r*.74} 0,${-r*.62}Z"/><circle cy="${-r*.97}" r="2"/></g>`}
+  for(let i=0;i<12;i++){const a=i*30+15;s+=`<g transform="rotate(${a})"><path d="M0,${-r*.3} Q${r*.14},${-r*.46} 0,${-r*.62} Q${-r*.14},${-r*.46} 0,${-r*.3}Z"/></g>`}
+  return s+'</g>';
+}
+function sparkle(x,y,s,col,op){return `<path transform="translate(${x},${y}) scale(${s})" d="M0,-10 C1,-2 2,-1 10,0 C2,1 1,2 0,10 C-1,2 -2,1 -10,0 C-2,-1 -1,-2 0,-10Z" fill="${col}" opacity="${op}"/>`}
+function arch(x,y,w,h){const r=w/2;return `M${x},${y+h} L${x},${y+r} A${r},${r} 0 0,1 ${x+w},${y+r} L${x+w},${y+h}Z`}
+
+// ---------- scenes ----------
+function sceneDhanteras(){
+  const D=L==='desktop';
+  let bg=`<rect width="${W}" height="${H}" fill="${C.ivory}"/>
+   <radialGradient id="ivg" cx="${D?.72:.5}" cy="${D?.55:.75}" r=".7"><stop offset="0" stop-color="#fbe7d2"/><stop offset="1" stop-color="${C.ivory}" stop-opacity="0"/></radialGradient>
+   <rect width="${W}" height="${H}" fill="url(#ivg)"/>`;
+  // arch panel
+  const aw=D?520:420, ax=D?810:(W-aw)/2, ay=D?48:340, ah=H-ay+2;
+  let s=bg;
+  s+=mandala(D?120:W/2, D?H+40:-30, D?300:260, C.copper, .13);
+  s+=`<path d="${arch(ax-14,ay-14,aw+28,ah+20)}" fill="none" stroke="${C.copper}" stroke-opacity=".55" stroke-width="1.2"/>`;
+  s+=`<path d="${arch(ax,ay,aw,ah)}" fill="${C.brown}"/>`;
+  s+=`<clipPath id="ac"><path d="${arch(ax,ay,aw,ah)}"/></clipPath><g clip-path="url(#ac)">
+    <radialGradient id="archShade" cx=".5" cy=".35" r=".8"><stop offset="0" stop-color="#7a4c22"/><stop offset="1" stop-color="#3a210b"/></radialGradient>
+    <rect x="${ax}" y="${ay}" width="${aw}" height="${ah}" fill="url(#archShade)"/>
+    ${mandala(ax+aw/2, ay+aw*.42, aw*.48, C.peach, .16)}
+    <ellipse cx="${ax+aw/2}" cy="${ay+aw*.5}" rx="${aw*.55}" ry="${aw*.5}" fill="url(#glowSoft)"/>
+    <rect x="${ax}" y="${H-(D?92:78)}" width="${aw}" height="200" fill="#2a1606" opacity=".55"/>
+    <path d="M${ax},${H-(D?92:78)} L${ax+aw},${H-(D?92:78)}" stroke="${C.peach}" stroke-opacity=".25"/>
+  </g>`;
+  const cx=ax+aw/2, gy=H-(D?58:46), k=D?1.12:.86;
+  s+=`<g clip-path="url(#ac)">`;
+  s+=at(cx-k*150,gy+4,k*.82,lota('copper'));
+  s+=at(cx+k*150,gy+2,k*.86,tumbler('brass'));
+  s+=at(cx,gy-6,k,kalash('copper'));
+  s+=coin(cx-k*62,gy+16*k,'brass',22*k)+coin(cx-k*58,gy+10*k,'brass',22*k)+coin(cx-k*64,gy+4*k,'brass',22*k);
+  s+=coin(cx+k*78,gy+22*k,'brass',20*k)+coin(cx+k*40,gy+28*k,'brass',18*k);
+  s+=at(cx+k*205,gy+22*k,k*.55,diya('brass'));
+  s+=at(cx-k*215,gy+24*k,k*.55,diya('brass'));
+  s+=`</g>`;
+  for(const [x,y,sc] of (D?[[ax-40,140,.9],[ax+aw+36,220,.7],[ax+aw+20,90,.5],[ax-20,330,.5]]:[[60,330,.7],[W-60,360,.9],[W-40,300,.5]])) s+=sparkle(x,y,sc,C.copper,.7);
+  s+=`<rect width="${W}" height="${H}" filter="url(#grain)" opacity=".9"/>`;
+  return s;
+}
+function sceneDiwali(){
+  const D=L==='desktop';
+  let s=`<linearGradient id="nb" x1="0" x2="${D?1:0}" y1="0" y2="1"><stop offset="0" stop-color="#2b1708"/><stop offset=".55" stop-color="#4a2c11"/><stop offset="1" stop-color="${C.brown}"/></linearGradient>
+  <rect width="${W}" height="${H}" fill="url(#nb)"/>`;
+  s+=mandala(D?1060:W/2, D?300:470, D?330:300, C.peach, .09);
+  // bokeh
+  const rnd=(i)=>{const x=Math.sin(i*91.7)*43758.5;return x-Math.floor(x)};
+  for(let i=0;i<(D?38:26);i++){
+    const x=(D?620:0)+rnd(i)*(D?820:W), y=rnd(i+50)*H*(D?1:.6), r=4+rnd(i+99)*16;
+    s+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${rnd(i+7)>.5?C.peach:'#ffd69a'}" opacity="${.06+rnd(i+3)*.16}" filter="url(#b4)"/>`;
+  }
+  const cx=D?1050:W/2, gy=H-(D?66:52), k=D?1.18:.74;
+  s+=`<ellipse cx="${cx}" cy="${gy-60*k}" rx="${360*k}" ry="${240*k}" fill="url(#glowSoft)"/>`;
+  // surface
+  s+=`<rect x="0" y="${gy-10*k}" width="${W}" height="${H}" fill="#1c0e04" opacity=".55"/><path d="M0,${gy-10*k} L${W},${gy-10*k}" stroke="${C.peach}" stroke-opacity=".18"/>`;
+  // hanging lamps
+  const hl=D?[[cx-230,110,.95],[cx-80,60,.8],[cx+100,130,1],[cx+250,70,.8]]:[[cx-170,40,.75],[cx,90,.85],[cx+170,40,.75]];
+  for(const [x,l,sc] of hl) s+=hangLamp(x,l,sc*k);
+  s+=at(cx-240*k,gy,0.82*k,lota('copper'));
+  s+=at(cx+245*k,gy,0.9*k,tumbler('copper'));
+  s+=at(cx,gy-2,k,thali('brass'));
+  const ds=[[-110,-14,.9],[0,-22,1],[110,-14,.9],[-55,4,.85],[58,4,.85]];
+  for(const [x,y,sc] of ds) s+=at(cx+x*k,gy+y*k,sc*.8*k,diya('brass'));
+  // foreground diyas
+  const fg=D?[[cx-320*k,gy+40*k,.6],[cx+175*k,gy+46*k,.6]]:[[cx-200,gy+30,.55],[cx+200,gy+32,.55]];
+  for(const [x,y,sc] of fg) s+=at(x,y,sc*k,diya('brass'));
+  // petals
+  for(let i=0;i<(D?14:9);i++){const x=cx+(rnd(i+200)-.5)*(D?700:460)*k, y=gy+20*k+rnd(i+300)*30*k;s+=`<ellipse cx="${x}" cy="${y}" rx="${5*k}" ry="${2.6*k}" transform="rotate(${rnd(i)*180} ${x} ${y})" fill="${rnd(i+5)>.4?'#e08a2c':'#f1b33d'}" opacity=".85"/>`}
+  for(const [x,y,sc] of (D?[[160,80,.6],[640,120,.8],[700,520,.5],[1380,180,.6]]:[[40,250,.6],[W-40,280,.7]])) s+=sparkle(x,y,sc,C.peach,.6);
+  s+=`<rect width="${W}" height="${H}" filter="url(#grain)" opacity=".6"/>`;
+  return s;
+}
+
+// ---------- text ----------
+const COPY={
+ dhanteras:{eyebrow:'The Dhanteras Edit',h:'Bring home the<br>auspicious <em>glow</em><br>of copper',sub:'Handcrafted copper, brass &amp; bronze — heirlooms to welcome prosperity this Dhanteras.',cta:'Shop the Dhanteras Edit',dark:false},
+ diwali:{eyebrow:'The Diwali Edit',h:'Light up every<br><em>gathering</em>',sub:'Diyas, thalis &amp; serveware in copper, brass &amp; bronze — made for hosting the ones you love.',cta:'Shop the Diwali Edit',dark:true},
+};
+function text(){
+  const c=COPY[V], D=L==='desktop', dk=c.dark;
+  const hc=dk?C.ivory:C.brown, ec=dk?C.peach:C.copper, sc=dk?'rgba(247,241,232,.82)':'rgba(95,57,22,.85)';
+  const pos=D?`left:112px;top:0;height:${H}px;width:${V==='diwali'?620:600}px;display:flex;flex-direction:column;justify-content:center;`
+             :`left:0;right:0;top:${V==='diwali'?150:30}px;text-align:center;display:flex;flex-direction:column;align-items:center;padding:0 36px;`;
+  const hs=D?(V==='diwali'?76:64):(V==='diwali'?50:40);
+  const hh=D?c.h:c.h.replace(/<br>/g,' ').replace('every gathering','every<br>gathering').replace('the auspicious','the<br>auspicious');
+  return `<div class="txt" style="${pos}">
+   <div class="eyebrow" style="color:${ec};font-size:${D?15:12}px;margin-bottom:${D?22:14}px">${c.eyebrow}</div>
+   <div class="h" style="color:${hc};font-size:${hs}px">${hh.replace('<em>',`<em style="color:${ec}">`)}</div>
+   <div class="orn" style="margin:${D?26:16}px 0 ${D?22:14}px"><i style="background:${ec}"></i><b style="border:1px solid ${ec}"></b><i style="background:${ec}"></i></div>
+   <div class="sub" style="color:${sc};font-size:${D?21:15.5}px;max-width:${D?470:440}px">${c.sub}</div>
+   <div style="margin-top:${D?34:20}px"><span class="cta" style="font-size:${D?14:11.5}px;padding:${D?'17px 34px':'13px 24px'};background:${dk?C.ivory:C.brown};color:${dk?C.brown:C.ivory}">${c.cta}<span>→</span></span></div>
+  </div>`;
+}
+// mobile diwali: text top; move scene lamps out of way => text sits below lamps? place text at top band
+const c=document.getElementById('c');
+c.style.width=W+'px';c.style.height=H+'px';
+const scene=V==='dhanteras'?sceneDhanteras():sceneDiwali();
+c.innerHTML=`<svg class="art" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><defs>${defs()}</defs>${scene}</svg>`+(T?text():'');
+document.fonts.ready.then(()=>document.body.dataset.ready=1);
+</script></body></html>
