@@ -1,0 +1,124 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:Playfair;src:url(fonts/playfair-display-latin-500-normal.woff2);font-weight:500}
+@font-face{font-family:Playfair;src:url(fonts/playfair-display-latin-500-italic.woff2);font-weight:500;font-style:italic}
+@font-face{font-family:Afacad;src:url(fonts/afacad-latin-400-normal.woff2);font-weight:400}
+@font-face{font-family:Afacad;src:url(fonts/afacad-latin-600-normal.woff2);font-weight:600}
+:root{--brown:#5F3916;--copper:#B5652A;--ivory:#F7F1E8;--peach:#F1A56C}
+*{margin:0;padding:0;box-sizing:border-box}
+#c{position:relative;width:1440px;height:600px;overflow:hidden;background:#2a1607}
+.layer{position:absolute;inset:0}
+.p{position:absolute}
+.p img{display:block;width:100%;height:100%}
+.refl{position:absolute;transform:scaleY(-1);opacity:.22;
+  -webkit-mask-image:linear-gradient(to top,#000 0,transparent 28%);mask-image:linear-gradient(to top,#000 0,transparent 28%)}
+.shadow{position:absolute;border-radius:50%;background:radial-gradient(closest-side,rgba(10,4,0,.75),rgba(10,4,0,0));}
+.txt{position:absolute;left:112px;top:0;height:600px;width:560px;display:flex;flex-direction:column;justify-content:center;font-family:Afacad,sans-serif}
+.eyebrow{font-weight:600;letter-spacing:.34em;text-transform:uppercase;color:var(--peach);font-size:14px;margin-bottom:22px}
+.h{font-family:Playfair,serif;font-weight:500;font-size:66px;line-height:1.06;color:var(--ivory)}
+.h em{font-style:italic;color:var(--peach)}
+.orn{display:flex;align-items:center;gap:12px;margin:26px 0 22px}
+.orn i{display:block;height:1px;width:56px;background:var(--peach)}
+.orn b{display:block;width:7px;height:7px;transform:rotate(45deg);border:1px solid var(--peach)}
+.sub{font-size:20px;line-height:1.45;color:rgba(247,241,232,.84);max-width:470px}
+.cta{margin-top:34px}
+.cta span{display:inline-block;font-weight:600;letter-spacing:.22em;text-transform:uppercase;font-size:13.5px;padding:17px 32px;background:var(--ivory);color:var(--brown);border-radius:2px}
+</style></head>
+<body><div id="c">
+ <svg class="layer" id="bg" width="1440" height="600" viewBox="0 0 1440 600"></svg>
+ <div class="layer" id="prod"></div>
+ <svg class="layer" id="fg" width="1440" height="600" viewBox="0 0 1440 600"></svg>
+ <div class="txt" id="txt">
+  <div class="eyebrow">Dhanteras &amp; Diwali Edit</div>
+  <div class="h">An auspicious<br>beginning, in<br><em>pure copper</em></div>
+  <div class="orn"><i></i><b></b><i></i></div>
+  <div class="sub">Handcrafted copper, brass &amp; bronze — for an auspicious Dhanteras and a Diwali full of gatherings.</div>
+  <div class="cta"><span>Shop the Festive Edit &nbsp;→</span></div>
+ </div>
+</div>
+<script>
+const NOTEXT=new URLSearchParams(location.search).get('t')==='0';
+if(NOTEXT) document.getElementById('txt').remove();
+const SURF=440; // table line
+// ---------- background ----------
+const rnd=i=>{const x=Math.sin(i*91.7)*43758.5;return x-Math.floor(x)};
+function mandala(cx,cy,r,col,op){
+  let s=`<g transform="translate(${cx},${cy})" fill="none" stroke="${col}" stroke-opacity="${op}" stroke-width="1"><circle r="${r}"/><circle r="${r*.94}"/><circle r="${r*.62}"/><circle r="${r*.3}"/>`;
+  for(let i=0;i<24;i++)s+=`<g transform="rotate(${i*15})"><path d="M0,${-r*.62} C${r*.09},${-r*.74} ${r*.06},${-r*.88} 0,${-r*.94} C${-r*.06},${-r*.88} ${-r*.09},${-r*.74} 0,${-r*.62}Z"/><circle cy="${-r*.97}" r="2"/></g>`;
+  for(let i=0;i<12;i++)s+=`<g transform="rotate(${i*30+15})"><path d="M0,${-r*.3} Q${r*.14},${-r*.46} 0,${-r*.62} Q${-r*.14},${-r*.46} 0,${-r*.3}Z"/></g>`;
+  return s+'</g>';
+}
+let bg=`<defs>
+ <linearGradient id="wall" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#2a1607"/><stop offset=".45" stop-color="#3d2310"/><stop offset="1" stop-color="#4a2c12"/></linearGradient>
+ <radialGradient id="halo" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#F1A56C" stop-opacity=".42"/><stop offset=".5" stop-color="#B5652A" stop-opacity=".14"/><stop offset="1" stop-color="#B5652A" stop-opacity="0"/></radialGradient>
+ <linearGradient id="table" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3a200b"/><stop offset=".25" stop-color="#2a1607"/><stop offset="1" stop-color="#170b03"/></linearGradient>
+ <radialGradient id="tableGlow" cx=".5" cy="0" r=".7"><stop offset="0" stop-color="#F1A56C" stop-opacity=".22"/><stop offset="1" stop-color="#F1A56C" stop-opacity="0"/></radialGradient>
+ <filter id="b3" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter>
+ <filter id="b6" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+ <radialGradient id="vig" cx=".62" cy=".45" r=".85"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></radialGradient>
+</defs>
+<rect width="1440" height="600" fill="url(#wall)"/>
+${mandala(1010,250,300,'#F1A56C',.08)}
+<ellipse cx="1010" cy="300" rx="430" ry="300" fill="url(#halo)"/>`;
+// string-light bokeh along two catenaries
+for(const [y0,sag,n,seed] of [[40,70,22,1],[10,110,18,40]]){
+  for(let i=0;i<n;i++){const t=i/(n-1),x=640+t*800,y=y0+sag*4*t*(1-t)+(rnd(i+seed)-.5)*8,r=3+rnd(i+seed+9)*9;
+   bg+=`<circle cx="${x}" cy="${y}" r="${r+6}" fill="#ffcf8f" opacity="${.05+rnd(i+seed+3)*.08}" filter="url(#b6)"/><circle cx="${x}" cy="${y}" r="${r*.45}" fill="#fff1d2" opacity="${.25+rnd(i+seed+5)*.35}" filter="url(#b3)"/>`}
+}
+for(let i=0;i<26;i++){const x=600+rnd(i+70)*840,y=60+rnd(i+80)*340,r=6+rnd(i+90)*18;bg+=`<circle cx="${x}" cy="${y}" r="${r}" fill="#F1A56C" opacity="${.04+rnd(i+95)*.08}" filter="url(#b6)"/>`}
+bg+=`<rect y="${SURF}" width="1440" height="${600-SURF}" fill="url(#table)"/>
+<rect y="${SURF}" width="1440" height="${600-SURF}" fill="url(#tableGlow)"/>
+<path d="M0,${SURF} L1440,${SURF}" stroke="#F1A56C" stroke-opacity=".18"/>`;
+document.getElementById('bg').innerHTML=bg;
+
+// ---------- products (real photography cut-outs) ----------
+// [file, natural w, natural h, center x, baseline y, height]
+const P=[
+ ['disp_hammer',1721,1465, 968, SURF+6, 300],
+ ['bottle',1141,1821, 706, SURF+20, 284],
+ ['jug',1606,1596, 1262, SURF+14, 262],
+ ['thali',1807,1061, 872, 590, 112],
+];
+let ph='';
+for(const [f,nw,nh,cx,by,h] of P){
+  const w=h*nw/nh, l=cx-w/2, t=by-h;
+  ph+=`<div class="shadow" style="left:${cx-w*.46}px;top:${by-w*.05}px;width:${w*.92}px;height:${w*.1}px"></div>`;
+  if(f!=='thali') ph+=`<img class="refl" src="img/${f}.png" style="left:${l}px;top:${by-2}px;width:${w}px;height:${h}px">`;
+  ph+=`<div class="p" style="left:${l}px;top:${t}px;width:${w}px;height:${h}px"><img src="img/${f}.png"></div>`;
+}
+document.getElementById('prod').innerHTML=ph;
+
+// ---------- foreground: lit brass diyas, marigold petals, vignette ----------
+function flame(x,y,s){return `<g transform="translate(${x},${y}) scale(${s})"><circle cx="0" cy="-22" r="80" fill="url(#glow)"/><path d="M0,0 C-11,-7 -12,-26 0,-50 C12,-26 11,-7 0,0Z" fill="url(#flame)" filter="url(#fb)"/><path d="M0,-2 C-5,-6 -5,-16 0,-28 C5,-16 5,-6 0,-2Z" fill="#fffef6" opacity=".92"/></g>`}
+let uid=0;
+function diya(x,y,s){
+  const id='d'+(uid++);
+  return `<g transform="translate(${x},${y}) scale(${s})">
+   <ellipse cx="4" cy="8" rx="64" ry="9" fill="#0a0400" opacity=".55" filter="url(#fs)"/>
+   <clipPath id="${id}"><path d="M-50,-16 C-46,6 -14,10 6,10 C30,10 44,0 50,-10 L70,-22 C58,-24 48,-20 44,-16Z"/></clipPath>
+   <path d="M-50,-16 C-46,6 -14,10 6,10 C30,10 44,0 50,-10 L70,-22 C58,-24 48,-20 44,-16Z" fill="url(#brass)"/>
+   <path d="M-50,-16 C-46,6 -14,10 6,10 C30,10 44,0 50,-10 L70,-22 C58,-24 48,-20 44,-16Z" fill="url(#shadeV)"/>
+   <g clip-path="url(#${id})"><ellipse cx="-18" cy="-4" rx="18" ry="4" fill="#fff" opacity=".5" filter="url(#fs)"/></g>
+   <path d="M-50,-16 C-30,-24 30,-24 46,-16 C30,-9 -30,-9 -50,-16Z" fill="#2a1505"/>
+   <path d="M-44,-16 C-28,-21 26,-21 42,-16 C26,-12 -28,-12 -44,-16Z" fill="#8a5a16" opacity=".55"/>
+   ${flame(64,-22,.85)}
+  </g>`;
+}
+let fg=`<defs>
+ <linearGradient id="brass" x1="0" x2="1"><stop offset="0" stop-color="#3a2806"/><stop offset=".2" stop-color="#8a6a22"/><stop offset=".42" stop-color="#f4dc93"/><stop offset=".55" stop-color="#d9b45a"/><stop offset=".8" stop-color="#7a5b17"/><stop offset="1" stop-color="#2a1c04"/></linearGradient>
+ <linearGradient id="shadeV" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".15"/><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".5"/></linearGradient>
+ <radialGradient id="flame" cx=".5" cy=".72" r=".6"><stop offset="0" stop-color="#fffdf2"/><stop offset=".35" stop-color="#ffe7a6"/><stop offset=".7" stop-color="#F1A56C"/><stop offset="1" stop-color="#d9622a" stop-opacity=".6"/></radialGradient>
+ <radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffcf8f" stop-opacity=".55"/><stop offset=".4" stop-color="#F1A56C" stop-opacity=".16"/><stop offset="1" stop-color="#F1A56C" stop-opacity="0"/></radialGradient>
+ <filter id="fb" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.6"/></filter>
+ <filter id="fs" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4"/></filter>
+ <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .35  0 0 0 0 .2  0 0 0 .06 0"/></filter>
+ <radialGradient id="vig" cx=".62" cy=".45" r=".85"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".4"/></radialGradient>
+</defs>`;
+fg+=diya(632,572,.56)+diya(1366,566,.58)+diya(1080,584,.5);
+for(let i=0;i<16;i++){const x=650+rnd(i+200)*760,y=SURF+60+rnd(i+300)*95;if(x>760&&x<990&&y>530)continue;
+  fg+=`<ellipse cx="${x}" cy="${y}" rx="5.5" ry="2.8" transform="rotate(${rnd(i)*180} ${x} ${y})" fill="${rnd(i+5)>.4?'#e08a2c':'#f1b33d'}" opacity=".9"/>`}
+fg+=`<rect width="1440" height="600" fill="url(#vig)"/><rect width="1440" height="600" filter="url(#grain)"/>`;
+document.getElementById('fg').innerHTML=fg;
+Promise.all([document.fonts.ready,...[...document.images].map(i=>i.decode())]).then(()=>document.body.dataset.ready=1);
+</script></body></html>
