@@ -1,0 +1,46 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:Playfair;src:url(fonts/playfair-display-latin-500-normal.woff2);font-weight:500}
+@font-face{font-family:Playfair;src:url(fonts/playfair-display-latin-500-italic.woff2);font-weight:500;font-style:italic}
+@font-face{font-family:Afacad;src:url(fonts/afacad-latin-400-normal.woff2);font-weight:400}
+@font-face{font-family:Afacad;src:url(fonts/afacad-latin-600-normal.woff2);font-weight:600}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:transparent;width:1080px;height:1920px}
+#c{position:relative;width:1080px;height:1920px;overflow:hidden}
+.top{position:absolute;left:0;right:0;top:0;height:430px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-top:30px}
+.eyebrow{font-family:Afacad;font-weight:600;font-size:26px;letter-spacing:.38em;text-transform:uppercase;color:#B5652A;margin-bottom:22px;padding-left:.38em}
+.h{font-family:Playfair;font-weight:500;font-size:84px;line-height:1.04;color:#5F3916}
+.h em{font-style:italic;color:#B5652A}
+.bot{position:absolute;left:0;right:0;top:1510px;height:250px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 90px}
+.sub{font-family:Afacad;font-size:40px;line-height:1.35;color:rgba(95,57,22,.88)}
+.wm{position:absolute;left:0;right:0;top:1770px;display:flex;align-items:center;justify-content:center;gap:22px}
+.wm i{display:block;height:1.5px;width:90px;background:#B5652A;opacity:.7}
+.wm span{font-family:Playfair;font-weight:500;font-size:34px;letter-spacing:.42em;color:#5F3916;padding-left:.42em}
+/* end card */
+.end{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 42%,#7a4a1f 0%,#5F3916 45%,#3a2009 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.end .logo{font-family:Playfair;font-weight:500;font-size:120px;letter-spacing:.24em;padding-left:.24em;color:#F7F1E8}
+.orn{display:flex;align-items:center;gap:18px;margin:46px 0 40px}
+.orn i{display:block;height:1.5px;width:110px;background:#F1A56C}
+.orn b{display:block;width:12px;height:12px;transform:rotate(45deg);border:1.5px solid #F1A56C}
+.end .tag{font-family:Playfair;font-style:italic;font-size:54px;line-height:1.2;color:#F1A56C;max-width:820px}
+.end .cta{margin-top:90px;font-family:Afacad;font-weight:600;font-size:30px;letter-spacing:.26em;padding:30px 54px 30px calc(54px + .26em);background:#F7F1E8;color:#5F3916;border-radius:3px;text-transform:uppercase}
+</style></head>
+<body><div id="c"></div>
+<script>
+const S={
+ top1:['Pure Copper','Water, the way<br><em>tradition</em> intended.'],
+ top2:['The Daily Ritual','Fill it the<br><em>night before.</em>'],
+ top3:['Made to Carry','Sip <em>slow</em>,<br>all day long.'],
+ bot1:'Handcrafted copper, made for the modern home.',
+ bot2:'An age-old Indian ritual, made beautiful again.',
+ bot3:'Brushed copper body · hand-hammered base',
+};
+const L=new URLSearchParams(location.search).get('l');
+const c=document.getElementById('c');
+if(L.startsWith('top')) c.innerHTML=`<div class="top"><div class="eyebrow">${S[L][0]}</div><div class="h">${S[L][1]}</div></div>`;
+else if(L.startsWith('bot')) c.innerHTML=`<div class="bot"><div class="sub">${S[L]}</div></div>`;
+else if(L==='wm') c.innerHTML=`<div class="wm"><i></i><span>RITIKAM</span><i></i></div>`;
+else if(L==='end') c.innerHTML=`<div class="end"><div class="logo">RITIKAM</div><div class="orn"><i></i><b></b><i></i></div><div class="tag">Copper, brass &amp; bronze —<br>warm heritage for the home.</div><div class="cta">Shop now · rithikam.com</div></div>`;
+document.fonts.ready.then(()=>document.body.dataset.ready=1);
+</script></body></html>
