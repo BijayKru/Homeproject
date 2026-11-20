@@ -1,4 +1,4 @@
-"""Emerald necklace commercial, 16:9 (1920x1080), 15 s, one continuous beige set.
+"""Emerald necklace commercial, 16:9 (1920x1080), 10 s, one continuous beige set.
 
 Usage: python3 render_16x9.py OUT.mp4 [t1 t2 ...]   (times => preview JPGs instead of video)
 Inputs: the three reference photos plus rembg cut-outs of image 1 (pendant) and image 3 (model).
@@ -10,7 +10,7 @@ from PIL import Image, ImageFilter
 UP = os.environ.get("UPLOADS", "/root/.claude/uploads/13bdc3d8-f30d-5841-978c-ae76c1bd629a/")
 CUT = os.environ.get("CUTS", "/tmp/claude-0/-home-user-Homeproject/13bdc3d8-f30d-5841-978c-ae76c1bd629a/scratchpad/cut/")
 OUT = sys.argv[1]
-W, H, FPS, DUR = 1920, 1080, 30, 15.0
+W, H, FPS, DUR = 1920, 1080, 30, 10.0
 rng = np.random.default_rng(11)
 
 def clamp01(t): return min(max(t, 0.0), 1.0)
@@ -191,86 +191,76 @@ SM = 0.82
 M_EM_SCREEN = (W / 2, 1411 * SM - 40 - (1411 - EM3[1]) * SM)
 NECK_TO_MODEL_SCALE = (EMH3 * SM) / (EMH2 * SN)
 
-# ---------------------------------------------------------------- timeline
-T_A0, T_A1 = 3.3, 5.0        # pendant 1 rises/shrinks into the necklace
-T_D0, T_D1 = 5.2, 7.5        # descent and attach
-T_B0, T_B1 = 8.7, 10.4       # necklace glides into the worn shot
+# ---------------------------------------------------------------- timeline (10 s)
+DUR = 10.0
+T_HOLD = 1.8                 # scene 1: pendant close-up
+T_A0, T_A1 = 1.8, 3.6        # pendant travels straight down onto the necklace's attachment point
+T_SW = 3.6                   # lands: small swing + glow + light sweep
+T_B0, T_B1 = 4.8, 6.3        # complete necklace glides into the worn shot
+EM_FINAL = neck_screen(EM2)
+P1_END = EMH2 * SN / EMH1    # pendant-1 scale that matches the attached pendant
+
+def pend_path(t):
+    """Emerald position + size factor along a single downward move (no rise)."""
+    p = smoother(seg(t, T_A0, T_A1))
+    em = (lerp(W / 2, EM_FINAL[0], p), lerp(H / 2, EM_FINAL[1], p))
+    return p, em
 
 def frame(t):
     f = backdrop(t)
     jmask = np.zeros((H, W), np.float32)
     glints = []
     sweep = None
+    p, em = pend_path(t)
 
-    # ---- necklace chain (fades/settles in during transition A, replaced by full necklace later)
-    if T_A0 + 0.3 <= t < T_D1 + 0.01:
-        q = smoother(seg(t, T_A0 + 0.3, T_A1 + 0.2))
-        sc = SN * lerp(1.07, 1.0, q)
-        out = L_chain.draw(NECK_C, NECK_POS, sc)
-        jmask += composite(f, out, opacity=q)
+    # ---- necklace chain fades/settles in around the descending pendant
+    if T_A0 <= t < T_B0:
+        q = smoother(seg(t, T_A0 + 0.1, T_A1 - 0.2))
+        sc = SN * lerp(1.06, 1.0, q)
+        jmask += composite(f, L_chain.draw(NECK_C, NECK_POS, sc), opacity=q)
         if q > 0.95:
             glints += L_chain.glint_pts(NECK_C, NECK_POS, sc)
 
-    # ---- pendant from image 1 (scene 1, then travels into the necklace)
-    if t < T_A1 + 0.35:
-        p = smoother(seg(t, T_A0, T_A1))
-        sc = lerp(P1_S0, P1_S1, p)
-        pos = (lerp(W / 2, em2_start[0], p), lerp(H / 2, em2_start[1], p))
-        op = 1 - smooth(seg(t, T_A1 - 0.25, T_A1 + 0.35))
-        out = L_p1.draw(EM1, pos, sc)
-        jmask += composite(f, out, opacity=op, shadow=(lerp(26, 14, p), lerp(34, 20, p), 20, 0.34 * op))
-        if p < 0.05:
-            glints += L_p1.glint_pts(EM1, pos, sc)
-            sweep = (seg(t, 0.4, 3.0), 0.22, 170)
-
-    # ---- pendant from image 2 (takes over, descends and attaches)
-    if T_A1 - 0.25 <= t < T_D1 + 0.01:
-        d = smoother(seg(t, T_D0, T_D1))
-        sc = SN * lerp(P2_START_SCALE, 1.0, d)
-        pos = (lerp(P2_START_POS[0], ATTACH[0], d), lerp(P2_START_POS[1], ATTACH[1], d))
-        op = smooth(seg(t, T_A1 - 0.25, T_A1 + 0.35))
-        out = L_p2.draw(PIV, pos, sc)
-        jmask += composite(f, out, opacity=op, shadow=(14, 20, 16, 0.32 * op))
-        if op > 0.9:
-            glints += L_p2.glint_pts(PIV, pos, sc)
-
-    # ---- complete necklace: swing settle, then glide into the worn shot
-    if T_D1 <= t < T_B1:
-        u = t - T_D1
-        ang = 4.0 * math.exp(-u * 3.2) * math.sin(u * 8.0)
-        b = smoother(seg(t, T_B0, T_B1))
-        sc = SN * lerp(1.0, NECK_TO_MODEL_SCALE, b)
-        em_now = (lerp(neck_screen(EM2)[0], M_EM_SCREEN[0], b), lerp(neck_screen(EM2)[1], M_EM_SCREEN[1], b))
-        if b == 0:
-            # chain fixed, pendant swings about the attachment point
-            out = L_chain.draw(NECK_C, NECK_POS, SN)
-            jmask += composite(f, out)
-            out = L_p2.draw(PIV, ATTACH, SN, ang)
-            jmask += composite(f, out, shadow=(14, 20, 16, 0.32))
-            glints += L_neck.glint_pts(NECK_C, NECK_POS, SN)
-            # attachment glow
-            k = math.exp(-((t - T_D1 - 0.05) / 0.22) ** 2)
-            f += (np.exp(-(((XX - ATTACH[0]) / 60) ** 2 + ((YY - ATTACH[1]) / 60) ** 2)) * k * 150)[..., None]
-            sweep = (seg(t, T_D1 + 0.25, T_D1 + 1.9), 0.26, 140)
+    # ---- pendant (image 1 -> image 2 hand-off while moving straight down)
+    swap = smooth(seg(t, T_A0 + 0.55 * (T_A1 - T_A0), T_A1 - 0.1))
+    if t < T_A1 and swap < 1:
+        sc1 = lerp(P1_S0, P1_END, p)
+        op = 1 - swap
+        jmask += composite(f, L_p1.draw(EM1, em, sc1), opacity=op,
+                           shadow=(lerp(26, 14, p), lerp(34, 20, p), 20, 0.34 * op))
+        if t < T_HOLD:
+            glints += L_p1.glint_pts(EM1, em, sc1)
+            sweep = (seg(t, 0.15, 1.75), 0.24, 170)
+    if T_A0 < t < T_B0 and swap > 0:
+        r = (lerp(P1_S0, P1_END, p) * EMH1) / (EMH2 * SN)      # same emerald size as pendant 1
+        sc2 = SN * r
+        if t < T_A1:
+            jmask += composite(f, L_p2.draw(EM2, em, sc2), opacity=swap, shadow=(14, 20, 16, 0.32 * swap))
         else:
-            pass   # drawn in the model block so the hand-off sits on top of the model
+            u = t - T_SW
+            ang = 2.5 * math.exp(-u * 3.5) * math.sin(u * 8.5)
+            jmask += composite(f, L_p2.draw(PIV, ATTACH, SN, ang), shadow=(14, 20, 16, 0.32))
+            glints += L_p2.glint_pts(PIV, ATTACH, SN, ang)
+            k = math.exp(-((t - T_SW - 0.05) / 0.2) ** 2)
+            f += (np.exp(-(((XX - ATTACH[0]) / 60) ** 2 + ((YY - ATTACH[1]) / 60) ** 2)) * k * 150)[..., None]
+            sweep = (seg(t, T_SW + 0.15, T_B0 + 0.3), 0.26, 140)
 
-    # ---- model (image 3) materialises behind the gliding necklace
+    # ---- model materialises behind the gliding necklace
     if t >= T_B0:
-        push = lerp(1.0, 1.065, smoother(seg(t, T_B1, DUR)))
+        push = lerp(1.0, 1.06, smoother(seg(t, T_B1, DUR)))
         sc = SM * push
-        mop = smoother(seg(t, T_B0 + 0.25, T_B1 - 0.15))
+        mop = smoother(seg(t, T_B0 + 0.2, T_B1 - 0.1))
         mj = composite(f, L_model.draw(EM3, M_EM_SCREEN, sc), opacity=mop, shadow=(34, 24, 40, 0.22 * mop))
         if t >= T_B1:
             jmask += mj
             glints += L_model.glint_pts(EM3, M_EM_SCREEN, sc)
-            sweep = (seg(t, T_B1 + 0.5, T_B1 + 3.1), 0.30, 150)
+            sweep = (seg(t, T_B1 + 0.3, T_B1 + 2.6), 0.30, 150)
         else:
             b = smoother(seg(t, T_B0, T_B1))
             sc_n = SN * lerp(1.0, NECK_TO_MODEL_SCALE, b)
-            em_now = (lerp(neck_screen(EM2)[0], M_EM_SCREEN[0], b), lerp(neck_screen(EM2)[1], M_EM_SCREEN[1], b))
-            top_op = 1 - smoother(seg(t, T_B0, T_B0 + 0.9))
-            front_op = 1 - smoother(seg(t, T_B0 + 0.75, T_B1))
+            em_now = (lerp(EM_FINAL[0], M_EM_SCREEN[0], b), lerp(EM_FINAL[1], M_EM_SCREEN[1], b))
+            top_op = 1 - smoother(seg(t, T_B0, T_B0 + 0.75))
+            front_op = 1 - smoother(seg(t, T_B0 + 0.6, T_B1))
             sh = 0.30 * (1 - mop)
             if top_op > 0:
                 composite(f, L_neck_top.draw(EM2, em_now, sc_n), opacity=top_op, shadow=(14, 20, 16, sh * top_op))
