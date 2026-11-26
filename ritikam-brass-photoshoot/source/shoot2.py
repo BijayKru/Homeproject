@@ -282,7 +282,7 @@ CFG = {
     7: dict(mode='hi', horizon=380, w=1540, left=-30, cx=0, base=1680, sdx=50, sdy=60,
             props=[('spoons', 1400, 1580, 660, 6, False), ('rosemary', 1560, 470, 500, 160, True)]),
     8: dict(mode='hi', horizon=420, w=1620, left=430, cx=0, base=1700, sdx=50, sdy=60,
-            props=[('rosemary', -40, 1560, 600, -10, False), ('spoons', -60, 640, 560, 150, False)]),
+            props=[]),
 }
 PROPS = {n: np.array(Image.open(f'{D}/../props/{n}.png').convert('RGBA')) for n in ('rosemary', 'spoons')}
 PROPS = {k: v[Image.fromarray(v).getbbox()[1]:Image.fromarray(v).getbbox()[3], Image.fromarray(v).getbbox()[0]:Image.fromarray(v).getbbox()[2]] for k, v in PROPS.items()}
